@@ -45,6 +45,19 @@ class DirectedGraph:
             if neighbor not in visited:
                 self.dfs(neighbor, visited)
                 
+    def bfs(self, start_vertex):
+        from collections import deque
+        visited = set()
+        queue = deque([start_vertex])
+        visited.add(start_vertex)
+        while queue:
+            vertex = queue.popleft()
+            print(vertex.get_name())
+            for neighbor in self.get_neighbors(vertex):
+                if neighbor not in visited:
+                    visited.add(neighbor)
+                    queue.append(neighbor)
+
     def floyd_warshall(self):
         # Crear lista de vértices
         vertices = list(self.graph_dict.keys())
@@ -99,27 +112,44 @@ class Vertex:
     def __str__(self):
         return self.name    
     
+    def __eq__(self, other):
+        return isinstance(other, Vertex) and self.name == other.name
+
+    def __hash__(self):
+        return hash(self.name)
+    
 def build_graph(graph):
     g = graph()
     vertices = {}
-    for v in ("s", "a", "b", "c", "d"):
-        vert = Vertex(v)
-        vertices[v] = vert
+
+    n = int(input("¿Cuántos vértices quieres agregar? "))
+    for _ in range(n):
+        name = input("Nombre del vértice: ")
+        vert = Vertex(name)
+        vertices[name] = vert
         g.add_vertex(vert)
-    g.add_edge(Edge(vertices["s"], vertices["a"]))
-    g.add_edge(Edge(vertices["s"], vertices["b"]))
-    g.add_edge(Edge(vertices["a"], vertices["c"]))
-    g.add_edge(Edge(vertices["a"], vertices["d"]))
-    g.add_edge(Edge(vertices["b"], vertices["c"]))
-    g.add_edge(Edge(vertices["b"], vertices["d"]))
-    g.add_edge(Edge(vertices["c"], vertices["d"]))
-    g.add_edge(Edge(vertices["d"], vertices["s"]))
+
+    m = int(input("¿Cuántas aristas quieres agregar? "))
+    for _ in range(m):
+        v1 = input("Vértice origen: ")
+        v2 = input("Vértice destino: ")
+        if v1 in vertices and v2 in vertices:
+            g.add_edge(Edge(vertices[v1], vertices[v2]))
+        else:
+            print("Uno de los vértices no existe. Intenta de nuevo.")
     return g
 
 if __name__ == "__main__":
-    g = build_graph(DirectedGraph)
+    g = build_graph(UnDirected_Graph) #build_graph(DirectedGraph)
     print(g)
-    print("Recorrido en profundidad")
-    g.dfs(g.get_vertices("s"))
-    g.floyd_warshall()
+    start = input("Vértice de inicio para recorridos: ")
+    start_vertex = g.get_vertices(start)
+    if start_vertex:
+        print("Recorrido en profundidad")
+        g.dfs(start_vertex)
+        print("Recorrido en anchura")
+        g.bfs(start_vertex)
+        g.floyd_warshall()
+    else:
+        print("El vértice de inicio no existe.")
 
